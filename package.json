@@ -1,0 +1,17 @@
+{
+  "name": "laundry-sensor",
+  "version": "0.0.1",
+  "description": "Client services to run on a Raspberry Pi to detect whether or not laundry machines are running.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Anthony McLin",
+  "license": "MIT",
+  "devDependencies": {
+    "standard": "^10.0.3"
+  },
+  "dependencies": {
+    "rpio": "^0.9.20"
+  }
+}

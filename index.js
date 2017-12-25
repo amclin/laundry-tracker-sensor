@@ -1,4 +1,5 @@
 var rpio = require('rpio')
+var config = {}
 
 rpio.init({mock: 'raspi-3'})
 
@@ -34,6 +35,8 @@ var initSensors = function (sensors) {
  * @return Array List of objects containing sensors and their states
  **/
 var readSensors = function (sensors) {
+  console.log('Reading Sensors:', sensors)
+
   var sensorStates = []
 
   sensors.forEach(function (el) {
@@ -51,22 +54,30 @@ var readSensors = function (sensors) {
  */
 var publishStates = function () {
   var request = require('request')
+  var states = readSensors(config.sensors)
   var data = {
     form: {
-      states: readSensors(config.sensors)
+      states: states
     }
   }
 
-  console.log('Publishing sensor states to ', config.gateway)
+  console.log('Publishing sensor states to ', config.gateway, states)
   request.post(config.gateway, data, (err, res, body) => {
     if (err) { console.error(err) }
   })
 }
 
-var config = loadConfig()
-publishStates()
+/**
+ * Starts watching the sensors and running the publish loop
+ **/
+function start () {
+  config = loadConfig()
+  initSensors(config.sensors)
 
-console.log('Reading Sensors:', readSensors(config.sensors))
+  setInterval(() => {
+    publishStates()
+  }, config.publishInterval)
+}
 
 module.exports = function () {
   return {
@@ -75,4 +86,10 @@ module.exports = function () {
     initSensors: initSensors,
     rpio: rpio
   }
+}
+
+module.exports.start = start
+
+if (require.main === module) {
+  start()
 }

@@ -1,5 +1,6 @@
 {
   "gateway": "http://localhost:8888",
+  "publishInterval": 1000,
   "sensors": [
     {
       "pin": 8,

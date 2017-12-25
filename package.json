@@ -4,12 +4,15 @@
   "description": "Client services to run on a Raspberry Pi to detect whether or not laundry machines are running.",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "tap test/*.js --cov",
+    "pretest": "standard",
+    "start": "node index.js"
   },
   "author": "Anthony McLin",
   "license": "MIT",
   "devDependencies": {
-    "standard": "^10.0.3"
+    "standard": "^10.0.3",
+    "tap": "^11.0.1"
   },
   "dependencies": {
     "rpio": "^0.9.20"

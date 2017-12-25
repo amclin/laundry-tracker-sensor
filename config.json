@@ -4,19 +4,19 @@
       "pin": 8,
       "machine": "washer"
     },{
-      "pin": 9,
-      "machine": "washer"
-    },{
       "pin": 10,
       "machine": "washer"
     },{
       "pin": 11,
-      "machine": "dryer"
+      "machine": "washer"
     },{
       "pin": 12,
       "machine": "dryer"
     },{
       "pin": 13,
+      "machine": "dryer"
+    },{
+      "pin": 15,
       "machine": "dryer"
     }
   ]

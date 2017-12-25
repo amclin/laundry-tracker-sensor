@@ -1,4 +1,5 @@
 {
+  "gateway": "http://localhost:8888",
   "sensors": [
     {
       "pin": 8,

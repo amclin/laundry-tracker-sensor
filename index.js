@@ -46,7 +46,25 @@ var readSensors = function (sensors) {
   return sensorStates
 }
 
+/**
+ * Send the current states to the remote gateway
+ */
+var publishStates = function () {
+  var request = require('request')
+  var data = {
+    form: {
+      states: readSensors(config.sensors)
+    }
+  }
+
+  console.log('Publishing sensor states to ', config.gateway)
+  request.post(config.gateway, data, (err, res, body) => {
+    if (err) { console.error(err) }
+  })
+}
+
 var config = loadConfig()
+publishStates()
 
 console.log('Reading Sensors:', readSensors(config.sensors))
 

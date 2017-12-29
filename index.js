@@ -69,13 +69,14 @@ var prepareRequestData = function (sensorData) {
 
     return {
       machine: machine.id,
+      pin: sensor.pin,
       state: sensor.state
     }
   })
 
   return {
     location: config.locationid,
-    timestamp: time,
+    timestamp: time.toString(),
     states: data
   }
 }
@@ -88,10 +89,26 @@ var publishStates = function () {
   var states = readSensors(config.sensors)
   var data = prepareRequestData(states)
 
+  var options = {
+    method: 'POST',
+    baseUrl: config.gateway,
+    url: '/events',
+    'x-api-key': config.apikey,
+    json: true,
+    body: data
+  }
+
+  function callback (error, response, body) {
+    if (!error && response.statusCode === 200) {
+      console.log('Data published')
+    } else {
+      console.log('Publish failed:', error, response)
+    }
+  }
+
   console.log('Publishing sensor states to ', config.gateway, data)
-  request.post(config.gateway, data, (err, res, body) => {
-    if (err) { console.error(err) }
-  })
+
+  request(options, callback)
 }
 
 /**

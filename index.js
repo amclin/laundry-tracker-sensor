@@ -46,7 +46,38 @@ var readSensors = function (sensors) {
     })
   })
 
+  console.log('Sensor values:', sensorStates)
+
   return sensorStates
+}
+
+/**
+ * Prepare the data object that will be sent to the gateway
+ *
+ * @param object sensorData containing an array of pins and results
+ * @return object formatted data ready to send to API
+ **/
+var prepareRequestData = function (sensorData) {
+  var data = {}
+  var time = new Date().getTime() / 1000 | 0
+
+  // Loop through the sensors and match to the IDs
+  data = sensorData.map(function (sensor, idx) {
+    var machine = config.sensors.find(function (el) {
+      return (el.pin === sensor.pin)
+    })
+
+    return {
+      machine: machine.id,
+      state: sensor.state
+    }
+  })
+
+  return {
+    location: config.locationid,
+    timestamp: time,
+    states: data
+  }
 }
 
 /**
@@ -55,13 +86,9 @@ var readSensors = function (sensors) {
 var publishStates = function () {
   var request = require('request')
   var states = readSensors(config.sensors)
-  var data = {
-    form: {
-      states: states
-    }
-  }
+  var data = prepareRequestData(states)
 
-  console.log('Publishing sensor states to ', config.gateway, states)
+  console.log('Publishing sensor states to ', config.gateway, data)
   request.post(config.gateway, data, (err, res, body) => {
     if (err) { console.error(err) }
   })

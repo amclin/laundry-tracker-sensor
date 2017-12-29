@@ -1,0 +1,31 @@
+{
+	"location": "74e7af9e-2c22-4dd0-83c1-ef21963f0248",
+	"timestamp": "1514487935",
+	"states": [
+		{
+			"machine": "d56d76b2-d6e2-4426-b895-265e530f3fd5",
+			"pin": 11,
+			"state": true
+		},{
+			"machine": "c3498095-753f-4fd8-8087-ce4ba54652c4",
+			"pin": 12,
+			"state": true
+		},{
+			"machine": "3adc93b3-35b4-4007-bab1-b8f83b484d1d",
+			"pin": 13,
+			"state": false
+		},{
+			"machine": "a5b22962-41fa-48eb-b4d0-9f3455267a2a",
+			"pin": 14,
+			"state": true
+		},{
+			"machine": "dfbd26f1-8f13-4b7a-99bb-f1aaf78ff18b",
+			"pin": 15,
+			"state": false
+		},{
+			"machine": "ba898178-3675-440f-aab6-79e48de3c977",
+			"pin": 16,
+			"state": false
+		}
+	]
+}

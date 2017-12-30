@@ -26,6 +26,7 @@ var initSensors = function (sensors) {
 
   sensors.forEach(function (el) {
     rpio.open(el.pin, rpio.INPUT)
+    rpio.pud(el.pin, rpio.PULL_DOWN)
   })
 }
 
@@ -42,7 +43,6 @@ var readSensors = function (sensors) {
   var sensorStates = []
 
   sensors.forEach(function (el) {
-    var sensorBuffer = Buffer.alloc(config.sampleSize)
     sensorStates.push({
       pin: el.pin,
       state: readSensorBuffer(el.pin, config.sampleSize)
@@ -62,14 +62,14 @@ var readSensors = function (sensors) {
  * @param number amount of samples to take to check state
  **/
 var readSensorBuffer = function(pin, sampleSize) {
-  var samples = new Buffer.alloc(sampleSize, 1)
+  var samples = new Buffer.alloc(sampleSize, 0)
 
   // Collect some samples
   rpio.readbuf(pin, samples);
 
   // If sensor was closed at any point in the last sampleCount
   // consider the sensor triggered
-  return !samples.includes(0);
+  return samples.includes(1);
 }
 
 /**

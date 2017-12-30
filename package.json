@@ -6,7 +6,8 @@
   "scripts": {
     "test": "tap test/*.js --cov",
     "pretest": "standard",
-    "start": "node index.js"
+    "start": "node index.js",
+    "deploy": "./deploy.sh"
   },
   "author": "Anthony McLin",
   "license": "MIT",

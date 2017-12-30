@@ -103,13 +103,10 @@ var prepareRequestData = function (sensorData) {
 }
 
 /**
- * Send the current states to the remote gateway
+ * Send the current data to the remote gateway
  */
-var publishStates = function () {
+var publishData = function (data) {
   var request = require('request')
-  var states = readSensors(config.sensors)
-  var data = prepareRequestData(states)
-
   var options = {
     method: 'POST',
     baseUrl: config.gateway,
@@ -133,9 +130,39 @@ var publishStates = function () {
 }
 
 /**
+ * Blinks the LED a designated number of times
+ *
+ * @param count
+ **/
+async function blinkLED (count) {
+  var led = config.indicatorPin
+  var off = rpio.LOW
+  var on = rpio.HIGH
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  // Turn off LED so we can blink
+  rpio.write(led, off)
+  await sleep(400)
+
+  // Blink the LED
+  for(var x = 0; x < count; x++) {
+    rpio.write(led, on)
+    await sleep(200)
+    rpio.write(led, off)
+    await sleep(200)
+  }
+
+  await sleep(400)
+  // Restore LED to on
+  rpio.write(led, on)
+}
+
+/**
  * Initialization sequence
  **/
-function initIndicator () {
+async function initIndicator () {
   rpio.open(config.indicatorPin, rpio.OUTPUT, rpio.LOW)
 
   // blink on/off for a few seconds to indicate started
@@ -143,14 +170,14 @@ function initIndicator () {
   var state = rpio.HIGH;
 
   var loopIndicator = function() {
-    // toggle state for next interval
-    state = (state === rpio.HIGH) ? rpio.LOW : rpio.HIGH
     rpio.write(config.indicatorPin, state)
 
     // Stop the blinking in on state
-    if (interval < .0001) {
+    if (interval < .01) {
       rpio.write(config.indicatorPin, rpio.HIGH)
     } else {
+      // toggle state for next interval
+      state = (state === rpio.HIGH) ? rpio.LOW : rpio.HIGH
       // Loop the blinking, decreasing the interval each
       // blink so it speeds up
       interval = interval * .9;
@@ -170,10 +197,15 @@ function start () {
   config = loadConfig()
   initIndicator()
   initSensors(config.sensors)
-  
 
-  setInterval(() => {
-    publishStates()
+  setInterval(function() {
+    var states = readSensors(config.sensors)
+    var data = prepareRequestData(states)
+
+    // Blink the LED for each machine that's on
+    blinkLED(data.states.filter((el) => { return el.state }).length);
+    // Send the data to the cloud
+    publishData(data)
   }, config.publishInterval)
 }
 

@@ -1,7 +1,7 @@
 var rpio = require('rpio')
 var config = {}
 
-rpio.init({mock: 'raspi-3'})
+// rpio.init({mock: 'raspi-3'})
 
 /**
  * Loads the config from a file
@@ -22,6 +22,8 @@ var loadConfig = function (file) {
  * them to a read state
  */
 var initSensors = function (sensors) {
+  var streams = {}
+
   sensors.forEach(function (el) {
     rpio.open(el.pin, rpio.INPUT)
   })
@@ -40,15 +42,34 @@ var readSensors = function (sensors) {
   var sensorStates = []
 
   sensors.forEach(function (el) {
+    var sensorBuffer = Buffer.alloc(config.sampleSize)
     sensorStates.push({
       pin: el.pin,
-      state: rpio.read(el.pin)
+      state: readSensorBuffer(el.pin, config.sampleSize)
     })
   })
 
   console.log('Sensor values:', sensorStates)
 
-  return sensorStates
+  return sensorStates 
+}
+
+/**
+ * Read from a sensor using a buffer
+ * because the sensor used has instant feedback
+ *
+ * @param number Pin to sample
+ * @param number amount of samples to take to check state
+ **/
+var readSensorBuffer = function(pin, sampleSize) {
+  var samples = new Buffer.alloc(sampleSize, 1)
+
+  // Collect some samples
+  rpio.readbuf(pin, samples);
+
+  // If sensor was closed at any point in the last sampleCount
+  // consider the sensor triggered
+  return !samples.includes(0);
 }
 
 /**
@@ -112,11 +133,44 @@ var publishStates = function () {
 }
 
 /**
+ * Initialization sequence
+ **/
+function initIndicator () {
+  rpio.open(config.indicatorPin, rpio.OUTPUT, rpio.LOW)
+
+  // blink on/off for a few seconds to indicate started
+  var interval = 1000
+  var state = rpio.HIGH;
+
+  var loopIndicator = function() {
+    // toggle state for next interval
+    state = (state === rpio.HIGH) ? rpio.LOW : rpio.HIGH
+    rpio.write(config.indicatorPin, state)
+
+    // Stop the blinking in on state
+    if (interval < .0001) {
+      rpio.write(config.indicatorPin, rpio.HIGH)
+    } else {
+      // Loop the blinking, decreasing the interval each
+      // blink so it speeds up
+      interval = interval * .9;
+      setTimeout(loopIndicator, interval)
+    }
+  }
+
+  // Start the blink
+  rpio.write(config.indicatorPin, rpio.HIGH)
+  setTimeout(loopIndicator, interval)
+}
+
+/**
  * Starts watching the sensors and running the publish loop
  **/
 function start () {
   config = loadConfig()
+  initIndicator()
   initSensors(config.sensors)
+  
 
   setInterval(() => {
     publishStates()

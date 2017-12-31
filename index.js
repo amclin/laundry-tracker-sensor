@@ -1,3 +1,5 @@
+console.log('Starting laundry sensor service.');
+
 var rpio = require('rpio')
 const config = require('./config.json')
 
@@ -24,18 +26,18 @@ var initSensors = function (sensors) {
  * @return Array List of objects containing sensors and their states
  **/
 var readSensors = function (sensors) {
-  console.log('Reading Sensors:', sensors)
+  console.log('Reading Sensors:', sensors.length)
 
   var sensorStates = []
 
   sensors.forEach(function (el) {
     sensorStates.push({
       pin: el.pin,
-      state: readSensorBuffer(el.pin, config.sampleSize)
+      state: readSensorBuffer(el.pin, config.sampleSize, config.sampleWindow)
     })
   })
 
-  console.log('Sensor values:', sensorStates)
+  console.log('Done reading sensors.')
 
   return sensorStates 
 }
@@ -46,16 +48,27 @@ var readSensors = function (sensors) {
  *
  * @param number Pin to sample
  * @param number amount of samples to take to check state
+ * @param number time in ms to wait for sample buffer to fill
  **/
-var readSensorBuffer = function(pin, sampleSize) {
-  var samples = new Buffer.alloc(sampleSize, 0)
+var readSensorBuffer = function(pin, sampleSize, sampleDuration) {
+  console.log('Reading pin:',pin)
 
   // Collect some samples
-  rpio.readbuf(pin, samples);
+  var samples = new Buffer.alloc(sampleSize, 0)
+  rpio.readbuf(pin, samples)
 
-  // If sensor was closed at any point in the last sampleCount
-  // consider the sensor triggered
-  return samples.includes(1);
+  // Pause to give some time to fill a buffer with data
+  var logger = setInterval(function() {
+    process.stdout.write('.')
+  },100)
+  rpio.msleep(sampleDuration)
+  clearInterval(logger)
+
+  // Respond with the state
+  var state = samples.includes(1);
+  var message = (state) ? '\x1b[32m[On]\x1b[0m' : '\x1b[33m[Off]\x1b[0m';
+  console.log(message)
+  return state;
 }
 
 /**
@@ -152,7 +165,7 @@ async function initIndicator () {
   rpio.open(config.indicatorPin, rpio.OUTPUT, rpio.LOW)
 
   // blink on/off for a few seconds to indicate started
-  var interval = 1000
+  var interval = 600
   var state = rpio.HIGH;
 
   var loopIndicator = function() {
@@ -183,15 +196,20 @@ function start () {
   initIndicator()
   initSensors(config.sensors)
 
-  setInterval(function() {
+  function loop() {
     var states = readSensors(config.sensors)
     var data = prepareRequestData(states)
-
     // Blink the LED for each machine that's on
-    blinkLED(data.states.filter((el) => { return el.state }).length);
+    blinkLED(data.states.filter((el) => { return el.state }).length)
     // Send the data to the cloud
     publishData(data)
-  }, config.publishInterval)
+    // Wait before running again
+    setTimeout(loop, config.publishInterval)
+  }
+
+  // Start the loop after initial delay to give
+  // time for the startup blink and init to run
+  setTimeout(loop, config.publishInterval)
 }
 
 module.exports = function () {

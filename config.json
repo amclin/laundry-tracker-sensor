@@ -2,7 +2,8 @@
   "gateway": "https://c5x6853pnc.execute-api.us-east-2.amazonaws.com/beta/",
   "apikey": "1UDYntK3hY8JS1sNcZZKb45YClhVKDLV3vuFdOIs",
   "locationid": "74e7af9e-2c22-4dd0-83c1-ef21963f0248",
-  "sampleSize": 100000,
+  "sampleSize": 1000000,
+  "sampleWindow": 1000,
   "publishInterval": 10000,
   "indicatorPin": 3,
   "sensors": [

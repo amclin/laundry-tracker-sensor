@@ -1,21 +1,7 @@
 var rpio = require('rpio')
-var config = {}
+const config = require('./config.json')
 
 // rpio.init({mock: 'raspi-3'})
-
-/**
- * Loads the config from a file
- *
- * @return Object config object
- **/
-var loadConfig = function (file) {
-  file = file || 'config.json'
-  var fs = require('fs')
-  var contents = fs.readFileSync(file)
-  var config = JSON.parse(contents)
-  console.log('Reading sensor configs from file:', config)
-  return config
-}
 
 /**
  * Loops through the configured list of pins and sets
@@ -194,7 +180,6 @@ async function initIndicator () {
  * Starts watching the sensors and running the publish loop
  **/
 function start () {
-  config = loadConfig()
   initIndicator()
   initSensors(config.sensors)
 

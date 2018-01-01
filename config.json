@@ -3,33 +3,33 @@
   "apikey": "1UDYntK3hY8JS1sNcZZKb45YClhVKDLV3vuFdOIs",
   "locationid": "74e7af9e-2c22-4dd0-83c1-ef21963f0248",
   "sampleSize": 1000000,
-  "sampleWindow": 1000,
   "publishInterval": 10000,
   "publishing": true,
+  "sampleWindow": 1500,
   "indicatorPin": 3,
   "sensors": [
     {
-      "pin": 8,
+      "pin": 10,
       "machine": "washer",
       "id": "d56d76b2-d6e2-4426-b895-265e530f3fd5"
     },{
-      "pin": 10,
+      "pin": 19,
       "machine": "washer",
       "id": "c3498095-753f-4fd8-8087-ce4ba54652c4"
     },{
-      "pin": 11,
+      "pin": 26,
       "machine": "washer",
       "id": "3adc93b3-35b4-4007-bab1-b8f83b484d1d"
     },{
-      "pin": 12,
+      "pin": 31,
       "machine": "dryer",
       "id": "a5b22962-41fa-48eb-b4d0-9f3455267a2a"
     },{
-      "pin": 13,
+      "pin": 35,
       "machine": "dryer",
       "id": "dfbd26f1-8f13-4b7a-99bb-f1aaf78ff18b"
     },{
-      "pin": 15,
+      "pin": 40,
       "machine": "dryer",
       "id": "ba898178-3675-440f-aab6-79e48de3c977"
     }

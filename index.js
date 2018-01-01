@@ -12,7 +12,7 @@ const config = require('./config.json')
 var initSensors = function (sensors) {
   sensors.forEach(function (el) {
     rpio.open(el.pin, rpio.INPUT)
-    rpio.pud(el.pin, rpio.PULL_DOWN)
+    rpio.pud(el.pin, rpio.PULL_UP)
   })
 }
 
@@ -52,7 +52,7 @@ var readSensorBuffer = function (pin, sampleSize, sampleDuration) {
   console.log('Reading pin:', pin)
 
   // Collect some samples
-  var samples = Buffer.alloc(sampleSize, 0)
+  var samples = Buffer.alloc(sampleSize, 1)
   rpio.readbuf(pin, samples)
 
   // Pause to give some time to fill a buffer with data
@@ -63,7 +63,7 @@ var readSensorBuffer = function (pin, sampleSize, sampleDuration) {
   clearInterval(logger)
 
   // Respond with the state
-  var state = samples.includes(1)
+  var state = samples.includes(0)
   var message = (state) ? '\x1b[32m[On]\x1b[0m' : '\x1b[33m[Off]\x1b[0m'
   console.log(message)
   return state

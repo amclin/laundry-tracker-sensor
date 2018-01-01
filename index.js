@@ -1,4 +1,4 @@
-console.log('Starting laundry sensor service.');
+console.log('Starting laundry sensor service.')
 
 var rpio = require('rpio')
 const config = require('./config.json')
@@ -10,8 +10,6 @@ const config = require('./config.json')
  * them to a read state
  */
 var initSensors = function (sensors) {
-  var streams = {}
-
   sensors.forEach(function (el) {
     rpio.open(el.pin, rpio.INPUT)
     rpio.pud(el.pin, rpio.PULL_DOWN)
@@ -39,7 +37,7 @@ var readSensors = function (sensors) {
 
   console.log('Done reading sensors.')
 
-  return sensorStates 
+  return sensorStates
 }
 
 /**
@@ -50,25 +48,25 @@ var readSensors = function (sensors) {
  * @param number amount of samples to take to check state
  * @param number time in ms to wait for sample buffer to fill
  **/
-var readSensorBuffer = function(pin, sampleSize, sampleDuration) {
-  console.log('Reading pin:',pin)
+var readSensorBuffer = function (pin, sampleSize, sampleDuration) {
+  console.log('Reading pin:', pin)
 
   // Collect some samples
-  var samples = new Buffer.alloc(sampleSize, 0)
+  var samples = Buffer.alloc(sampleSize, 0)
   rpio.readbuf(pin, samples)
 
   // Pause to give some time to fill a buffer with data
-  var logger = setInterval(function() {
+  var logger = setInterval(function () {
     process.stdout.write('.')
-  },100)
+  }, 100)
   rpio.msleep(sampleDuration)
   clearInterval(logger)
 
   // Respond with the state
-  var state = samples.includes(1);
-  var message = (state) ? '\x1b[32m[On]\x1b[0m' : '\x1b[33m[Off]\x1b[0m';
+  var state = samples.includes(1)
+  var message = (state) ? '\x1b[32m[On]\x1b[0m' : '\x1b[33m[Off]\x1b[0m'
   console.log(message)
-  return state;
+  return state
 }
 
 /**
@@ -105,6 +103,12 @@ var prepareRequestData = function (sensorData) {
  * Send the current data to the remote gateway
  */
 var publishData = function (data) {
+  // Allow for a debug mode by configuration where we don't post
+  // to a remote server
+  if (!config.publishing) {
+    return
+  }
+
   var request = require('request')
   var options = {
     method: 'POST',
@@ -137,7 +141,7 @@ async function blinkLED (count) {
   var led = config.indicatorPin
   var off = rpio.LOW
   var on = rpio.HIGH
-  function sleep(ms) {
+  function sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
@@ -146,7 +150,7 @@ async function blinkLED (count) {
   await sleep(400)
 
   // Blink the LED
-  for(var x = 0; x < count; x++) {
+  for (var x = 0; x < count; x++) {
     rpio.write(led, on)
     await sleep(200)
     rpio.write(led, off)
@@ -166,20 +170,20 @@ async function initIndicator () {
 
   // blink on/off for a few seconds to indicate started
   var interval = 600
-  var state = rpio.HIGH;
+  var state = rpio.HIGH
 
-  var loopIndicator = function() {
+  var loopIndicator = function () {
     rpio.write(config.indicatorPin, state)
 
     // Stop the blinking in on state
-    if (interval < .01) {
+    if (interval < 0.01) {
       rpio.write(config.indicatorPin, rpio.HIGH)
     } else {
       // toggle state for next interval
       state = (state === rpio.HIGH) ? rpio.LOW : rpio.HIGH
       // Loop the blinking, decreasing the interval each
       // blink so it speeds up
-      interval = interval * .9;
+      interval = interval * 0.9
       setTimeout(loopIndicator, interval)
     }
   }
@@ -196,7 +200,7 @@ function start () {
   initIndicator()
   initSensors(config.sensors)
 
-  function loop() {
+  function loop () {
     var states = readSensors(config.sensors)
     var data = prepareRequestData(states)
     // Blink the LED for each machine that's on

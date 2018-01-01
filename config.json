@@ -5,6 +5,7 @@
   "sampleSize": 1000000,
   "sampleWindow": 1000,
   "publishInterval": 10000,
+  "publishing": true,
   "indicatorPin": 3,
   "sensors": [
     {
